@@ -1,6 +1,18 @@
 #!/bin/bash
 # documentation: https://wiki.debian.org/iptables
 
+# check for root
+if [[ $EUID -ne "0" ]]; then
+  echo "This script must be run as root" 1>&2
+  exit 1
+fi
+
+# initial OS check
+if [[ ! -f "/etc/debian_version" ]]; then
+  echo "This installer only works on Debian" 1>&2
+  exit 1
+fi
+
 # flush old rules
 iptables -F
 iptables -t nat -F
@@ -38,7 +50,7 @@ iptables -A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # allows SSH connections
-#iptables -A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
 
 # allows HTTP and HTTPS connections from anywhere (the normal ports for websites)
 #iptables -A INPUT -p tcp --dport 80 -j ACCEPT
